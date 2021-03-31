@@ -1,0 +1,6 @@
+pacmd set-default-sink alsa_output.OnBoard_D2
+#pacmd set-default-sink alsa_output.platform-sound-simple-card.analog-stereo
+#pacmd set-default-sink bluez_sink.0C_E0_E4_CB_2F_CC.a2dp_sink
+#pacmd set-default-sink alsa_output.usb-Logitech_Logitech_USB_Headset-00.analog-stereo
+#pacmd set-default-source alsa_input.usb-Logitech_Logitech_USB_Headset-00.analog-mono
+pacmd set-default-source alsa_input.usb-046d_HD_Webcam_C615_FCE2EEA0-00.analog-mono

@@ -1,5 +1,13 @@
 Bluetooth gpio experiments on the ASUS Tinkerboard.
 
+Equipment needed:
+1. PLT_M70 bluetooth earphone. 
+2. Koss KPH7 lightweight headphone.
+3. Logitech USB headset. 
+4. Seeed Grove starter kit LED. 
+5. Grove-LCD RGB Backlight V3.0 JHD1313M2. 
+6. Analog Servo.
+
 The following 3 tests are included: ( see below for tests summary )
 1. led test
 2. i2c lcd test
@@ -36,9 +44,6 @@ sudo vi /etc/rc.local ( add sudo dmesg -n 1 )
 sudo tinker-config
 set password, locale, timezone etc.
 don't reboot
-vi nosleep.sh ( add following line to disable sleep feature )
-sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-./nosleep.sh
 setup wifi:
 nmcli dev wifi list
 sudo nmcli con add con-name WiFi ifname wlan0 type wifi ssid mywifissid
@@ -53,6 +58,9 @@ Unplug serial USB cable from PC.
 Type "exit" on PC.
 Power on ASUS Tinkerboard.
 ssh linaro@192.168.86.xxx
+vi nosleep.sh ( add following line to disable sleep feature )
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+./nosleep.sh
 date
 sudo ifconfig
 lsb_release -a
@@ -60,8 +68,7 @@ sudo apt-get update
 sudo apt-get upgrade
 sync
 sudo reboot
-sudo apt-get install python-dev python-pip python-setuptools python3-dev python3-pip python3-setuptools dnsutils apache2 vsftpd ftp git python-smbus i2c-tools bluetooth blueman bluez python-bluetooth libbluetooth-dev rfkill
-sudo pip install pybluez
+sudo apt-get install python-dev python-pip python-setuptools python3-dev python3-pip python3-setuptools dnsutils apache2 vsftpd ftp git python-smbus i2c-tools bluetooth python-bluetooth libbluetooth-dev rfkill mpg123 mplayer
 sudo cat /proc/device-tree/i2c@ff140000/status  ( i2c-1 )
 sudo cat /proc/device-tree/pwm@ff680030/status  ( pwm-3 )
 sudo i2cdetect -y 1
@@ -91,7 +98,50 @@ connect ...
 info ...
 disconnect ...
 quit
+
 sudo ./enablebluetooth.sh
+
+sudo vi /etc/rc.local ( add following two lines )
+rfkill unblock bluetooth
+echo "pairable on\ndiscoverable on\nexit\n" | bluetoothctl
+sudo reboot
+
+put PLT_M70 on ear.
+power on PLT_M70.
+vi pair.sh
+echo -e "pair 0C:E0:E4:CB:2F:CC\ntrust 0C:E0:E4:CB:2F:CC\nquit" | bluetoothctl
+vi connect.sh
+echo -e "connect 0C:E0:E4:CB:2F:CC\nquit" | bluetoothctl
+./pair.sh
+./connect.sh
+pactl list short cards
+pacmd list-cards  ( look at profiles )
+pactl set-card-profile 2 a2dp_sink
+pactl list sinks
+pactl set-default-sink 6
+pactl set-sink-volume 6 65536
+aplay /usr/share/sounds/alsa/Front_Center.wav
+pacmd list-sinks
+pacmd set-default-sink bluez_sink.0C_E0_E4_CB_2F_CC.a2dp_sink
+aplay /usr/share/sounds/alsa/Front_Center.wav
+mplayer *.mp3
+power off PLT_M70.
+
+plugin Koss KPH7 lightweight headphone to Tinkerboard's phone jack.
+pacmd list-sinks
+pacmd set-default-sink alsa_output.OnBoard_D2
+aplay /usr/share/sounds/alsa/Front_Center.wav
+mplayer *.mp3
+
+plugin Logitech USB headset.
+pacmd list-sinks
+pacmd set-default-sink alsa_output.usb-Logitech_Logitech_USB_Headset-00.analog-stereo
+aplay /usr/share/sounds/alsa/Front_Center.wav
+mplayer *.mp3
+pacmd list-sources
+pacmd set-default-source alsa_input.usb-Logitech_Logitech_USB_Headset-00.analog-mono
+arecord test.wav
+aplay test.wav
 
 -------------------------------------------------------------------------
 
